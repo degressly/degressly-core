@@ -58,6 +58,8 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 	public ResponseEntity getResponseFromPrimary(HttpServletRequest httpServletRequest,
 			MultiValueMap<String, String> headers, MultiValueMap<String, String> params, String body) {
 
+		String traceId = MDC.get(TRACE_ID);
+
 		Future<ResponseEntity> primaryResponseFuture = primaryExecutorService
 			.submit(() -> getResponse(PRIMARY_HOST, httpServletRequest, headers, params, body));
 
@@ -67,8 +69,8 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 		Future<ResponseEntity> candidateResponseFuture = candidateExecutorService
 			.submit(() -> getResponse(CANDIDATE_HOST, httpServletRequest, headers, params, body));
 
-		publisherExecutorService.submit(() -> publishResponses(MDC.get(TRACE_ID), primaryResponseFuture,
-				secondaryResponseFuture, candidateResponseFuture));
+		publisherExecutorService.submit(() -> publishResponses(traceId, primaryResponseFuture, secondaryResponseFuture,
+				candidateResponseFuture));
 
 		try {
 			return primaryResponseFuture.get();
