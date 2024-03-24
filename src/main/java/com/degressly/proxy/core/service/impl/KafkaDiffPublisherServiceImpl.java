@@ -31,7 +31,7 @@ public class KafkaDiffPublisherServiceImpl implements DiffPublisherService {
 	public void publish(ResponsesDto result) {
 		try {
 			String payload = objectMapper.writeValueAsString(result);
-            logger.info("Sending payload {}", payload);
+			logger.info("Sending payload {}", payload);
 			kafkaTemplate.sendMessage(payload);
 		}
 		catch (JsonProcessingException e) {
