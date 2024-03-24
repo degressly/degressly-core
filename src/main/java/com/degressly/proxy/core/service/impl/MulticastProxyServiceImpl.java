@@ -85,17 +85,9 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 		var restTemplate = new RestTemplate();
 		var httpEntity = new HttpEntity<>(body, headers);
+		var queryParams = new HashMap<String, String>();
 
-		UriComponentsBuilder urlTemplate = UriComponentsBuilder.fromHttpUrl(host + httpServletRequest.getRequestURI());
-		Map<String, String> queryParams = new HashMap<>();
-
-		for (Map.Entry<String, List<String>> entry : params.entrySet()) {
-			urlTemplate.queryParam(entry.getKey(), new StringBuilder("{" + entry.getKey() + "}"));
-			queryParams.put(entry.getKey(), entry.getValue().getFirst());
-		}
-		urlTemplate = urlTemplate.encode();
-		var uriComponents = urlTemplate.buildAndExpand(queryParams);
-		var finalUrl = uriComponents.toString();
+		var finalUrl = getFinalUrl(host, httpServletRequest, params, queryParams);
 
 		HttpEntity<String> response;
 
@@ -118,30 +110,48 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 	}
 
+	private static String getFinalUrl(String host, HttpServletRequest httpServletRequest,
+			MultiValueMap<String, String> params, Map<String, String> queryParams) {
+		UriComponentsBuilder urlTemplate = UriComponentsBuilder.fromHttpUrl(host + httpServletRequest.getRequestURI());
+
+		for (Map.Entry<String, List<String>> entry : params.entrySet()) {
+			urlTemplate.queryParam(entry.getKey(), new StringBuilder("{" + entry.getKey() + "}"));
+			queryParams.put(entry.getKey(), entry.getValue().getFirst());
+		}
+
+		urlTemplate = urlTemplate.encode();
+		var uriComponents = urlTemplate.buildAndExpand(queryParams);
+		var finalUrl = uriComponents.toString();
+		return finalUrl;
+	}
+
 	private void publishResponses(String traceId, String requestUrl, Future<ResponseEntity> primaryResponseFuture,
 			Future<ResponseEntity> secondaryResponseFuture, Future<ResponseEntity> candidateResponseFuture) {
 
-		List<Pair<Future<ResponseEntity>, DownstreamResult>> responsePairs = new ArrayList<>(
-				Arrays.asList(Pair.of(primaryResponseFuture, new DownstreamResult()),
-						Pair.of(secondaryResponseFuture, new DownstreamResult()),
-						Pair.of(candidateResponseFuture, new DownstreamResult())));
+		List<Future<ResponseEntity>> responseFutures = new ArrayList<>(
+				Arrays.asList(primaryResponseFuture, secondaryResponseFuture, candidateResponseFuture));
 
-		for (Pair<Future<ResponseEntity>, DownstreamResult> responsePair : responsePairs) {
+		List<DownstreamResult> downstreamResults = new ArrayList<>();
+
+		for (Future<ResponseEntity> responseFuture : responseFutures) {
+			var downstreamResult = new DownstreamResult();
+			downstreamResults.add(downstreamResult);
+
 			try {
-				ResponseEntity response = responsePair.getLeft().get();
-				responsePair.getRight().setHttpResponse(response);
+				ResponseEntity response = responseFuture.get();
+				downstreamResult.setHttpResponse(response);
 			}
 			catch (Exception e) {
-				responsePair.getRight().setException(e);
+				downstreamResult.setException(e);
 			}
 		}
 
 		ResponsesDto responsesDto = ResponsesDto.builder()
 			.traceId(traceId)
 			.requestUrl(requestUrl)
-			.primaryResult(responsePairs.get(0).getRight())
-			.secondaryResult(responsePairs.get(1).getRight())
-			.candidateResult(responsePairs.get(2).getRight())
+			.primaryResult(downstreamResults.get(0))
+			.secondaryResult(downstreamResults.get(1))
+			.candidateResult(downstreamResults.get(2))
 			.build();
 
 		for (DiffPublisherService publisher : publishers) {

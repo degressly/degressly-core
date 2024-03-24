@@ -54,22 +54,22 @@ public class KafkaDiffPublisherServiceImpl implements DiffPublisherService {
 
 	}
 
-
 	@SuppressWarnings("unchecked")
 	private void parseBodyToJson(Map<String, Object> map) {
 		List<Map<String, Object>> resultMapList = new ArrayList<>(Arrays.asList(
 				(Map<String, Object>) map.get("primaryResult"), (Map<String, Object>) map.get("secondaryResult"),
 				(Map<String, Object>) map.get("candidateResult")));
 
-		for (Map<String, Object> resultMap: resultMapList) {
+		for (Map<String, Object> resultMap : resultMapList) {
 			Map<String, Object> httpResponse = (Map<String, Object>) resultMap.get("httpResponse");
 			try {
 				JsonNode node = objectMapper.readValue((String) httpResponse.get("body"), JsonNode.class);
 				httpResponse.put("body", node);
-			}  catch (JsonProcessingException e) {
-                // Do nothing
-            }
-        }
+			}
+			catch (JsonProcessingException e) {
+				// Do nothing
+			}
+		}
 
 	}
 
