@@ -69,8 +69,8 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 		Future<ResponseEntity> candidateResponseFuture = candidateExecutorService
 			.submit(() -> getResponse(CANDIDATE_HOST, httpServletRequest, headers, params, body));
 
-		publisherExecutorService.submit(() -> publishResponses(traceId, primaryResponseFuture, secondaryResponseFuture,
-				candidateResponseFuture));
+		publisherExecutorService.submit(() -> publishResponses(traceId, httpServletRequest.getRequestURI(),
+				primaryResponseFuture, secondaryResponseFuture, candidateResponseFuture));
 
 		try {
 			return primaryResponseFuture.get();
@@ -118,7 +118,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 	}
 
-	private void publishResponses(String traceId, Future<ResponseEntity> primaryResponseFuture,
+	private void publishResponses(String traceId, String requestUrl, Future<ResponseEntity> primaryResponseFuture,
 			Future<ResponseEntity> secondaryResponseFuture, Future<ResponseEntity> candidateResponseFuture) {
 
 		List<Pair<Future<ResponseEntity>, DownstreamResult>> responsePairs = new ArrayList<>(
@@ -138,6 +138,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 		ResponsesDto responsesDto = ResponsesDto.builder()
 			.traceId(traceId)
+			.requestUrl(requestUrl)
 			.primaryResult(responsePairs.get(0).getRight())
 			.secondaryResult(responsePairs.get(1).getRight())
 			.candidateResult(responsePairs.get(2).getRight())

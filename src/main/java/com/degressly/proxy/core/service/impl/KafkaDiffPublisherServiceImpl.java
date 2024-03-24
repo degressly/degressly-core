@@ -3,8 +3,12 @@ package com.degressly.proxy.core.service.impl;
 import com.degressly.proxy.core.dto.ResponsesDto;
 import com.degressly.proxy.core.kafka.ProducerTemplate;
 import com.degressly.proxy.core.service.DiffPublisherService;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -13,6 +17,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.ObjectError;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static com.degressly.proxy.core.Constants.TRACE_ID;
 
@@ -25,18 +36,40 @@ public class KafkaDiffPublisherServiceImpl implements DiffPublisherService {
 
 	Logger logger = LoggerFactory.getLogger(KafkaDiffPublisherServiceImpl.class);
 
-	private final ObjectMapper objectMapper = new ObjectMapper();
+	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Override
 	public void publish(ResponsesDto result) {
 		try {
-			String payload = objectMapper.writeValueAsString(result);
+			Map<String, Object> map = objectMapper.convertValue(result, new TypeReference<>() {
+			});
+			parseBodyToJson(map);
+			String payload = objectMapper.writeValueAsString(map);
 			logger.info("Sending payload {}", payload);
 			kafkaTemplate.sendMessage(payload);
 		}
 		catch (JsonProcessingException e) {
 			logger.error("Error parsing object: {}", result, e);
 		}
+
+	}
+
+
+	@SuppressWarnings("unchecked")
+	private void parseBodyToJson(Map<String, Object> map) {
+		List<Map<String, Object>> resultMapList = new ArrayList<>(Arrays.asList(
+				(Map<String, Object>) map.get("primaryResult"), (Map<String, Object>) map.get("secondaryResult"),
+				(Map<String, Object>) map.get("candidateResult")));
+
+		for (Map<String, Object> resultMap: resultMapList) {
+			Map<String, Object> httpResponse = (Map<String, Object>) resultMap.get("httpResponse");
+			try {
+				JsonNode node = objectMapper.readValue((String) httpResponse.get("body"), JsonNode.class);
+				httpResponse.put("body", node);
+			}  catch (JsonProcessingException e) {
+                // Do nothing
+            }
+        }
 
 	}
 
