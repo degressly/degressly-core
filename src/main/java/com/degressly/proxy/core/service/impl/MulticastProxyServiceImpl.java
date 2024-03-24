@@ -126,8 +126,8 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 		for (Pair<Future<ResponseEntity>, DownstreamResult> responsePair : responsePairs) {
 			try {
-				ResponseEntity primaryResponse = primaryResponseFuture.get();
-				responsePair.getRight().setHttpResponse(primaryResponse);
+				ResponseEntity response = responsePair.getLeft().get();
+				responsePair.getRight().setHttpResponse(response);
 			}
 			catch (Exception e) {
 				responsePair.getRight().setException(e);
