@@ -27,7 +27,12 @@ public class ProxyController {
 			final @RequestParam MultiValueMap<String, String> params,
 			final @RequestBody(required = false) String body) {
 
-		MDC.put(TRACE_ID, UUID.randomUUID().toString());
+		if (headers.containsKey(TRACE_ID)) {
+			MDC.put(TRACE_ID, headers.get(TRACE_ID).getFirst());
+		}
+		else {
+			MDC.put(TRACE_ID, UUID.randomUUID().toString());
+		}
 
 		return multicastProxyService.getResponseFromPrimary(request, headers, params, body);
 	}

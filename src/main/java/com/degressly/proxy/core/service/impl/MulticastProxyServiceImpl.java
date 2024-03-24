@@ -135,6 +135,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 		}
 
 		ResponsesDto responsesDto = ResponsesDto.builder()
+			.traceId(traceId)
 			.primaryResult(responsePairs.get(0).getRight())
 			.secondaryResult(responsePairs.get(1).getRight())
 			.candidateResult(responsePairs.get(2).getRight())

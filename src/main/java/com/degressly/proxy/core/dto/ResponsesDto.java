@@ -10,6 +10,8 @@ import java.util.Optional;
 @Builder
 public class ResponsesDto {
 
+	String traceId;
+
 	DownstreamResult primaryResult;
 
 	DownstreamResult secondaryResult;
