@@ -2,7 +2,7 @@ package com.degressly.proxy.core.service.impl;
 
 import com.degressly.proxy.core.dto.Observation;
 import com.degressly.proxy.core.kafka.ProducerTemplate;
-import com.degressly.proxy.core.service.DiffPublisherService;
+import com.degressly.proxy.core.service.ObservationPublisherService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
@@ -19,12 +19,12 @@ import java.util.Map;
 
 @Service
 @ConditionalOnProperty("diff.publisher.bootstrap-servers")
-public class KafkaDiffPublisherServiceImpl implements DiffPublisherService {
+public class KafkaObservationPublisherServiceImpl implements ObservationPublisherService {
 
 	@Autowired
 	ProducerTemplate kafkaTemplate;
 
-	Logger logger = LoggerFactory.getLogger(KafkaDiffPublisherServiceImpl.class);
+	Logger logger = LoggerFactory.getLogger(KafkaObservationPublisherServiceImpl.class);
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 

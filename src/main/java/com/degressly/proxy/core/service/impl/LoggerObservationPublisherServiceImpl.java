@@ -2,15 +2,15 @@ package com.degressly.proxy.core.service.impl;
 
 import com.degressly.proxy.core.dto.DownstreamResult;
 import com.degressly.proxy.core.dto.Observation;
-import com.degressly.proxy.core.service.DiffPublisherService;
+import com.degressly.proxy.core.service.ObservationPublisherService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LoggerDiffPublisherServiceImpl implements DiffPublisherService {
+public class LoggerObservationPublisherServiceImpl implements ObservationPublisherService {
 
-	Logger logger = LoggerFactory.getLogger(LoggerDiffPublisherServiceImpl.class);
+	Logger logger = LoggerFactory.getLogger(LoggerObservationPublisherServiceImpl.class);
 
 	@Override
 	public void publish(Observation observation) {

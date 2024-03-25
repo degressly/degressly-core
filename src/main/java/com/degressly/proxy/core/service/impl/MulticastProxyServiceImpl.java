@@ -2,7 +2,7 @@ package com.degressly.proxy.core.service.impl;
 
 import com.degressly.proxy.core.dto.DownstreamResult;
 import com.degressly.proxy.core.dto.Observation;
-import com.degressly.proxy.core.service.DiffPublisherService;
+import com.degressly.proxy.core.service.ObservationPublisherService;
 import com.degressly.proxy.core.service.MulticastProxyService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 	private String CANDIDATE_HOST;
 
 	@Autowired
-	List<DiffPublisherService> publishers = Collections.emptyList();
+	List<ObservationPublisherService> publishers = Collections.emptyList();
 
 	Logger logger = LoggerFactory.getLogger(MulticastProxyService.class);
 
@@ -153,7 +153,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 			.candidateResult(downstreamResults.get(2))
 			.build();
 
-		for (DiffPublisherService publisher : publishers) {
+		for (ObservationPublisherService publisher : publishers) {
 			publisher.publish(observation);
 		}
 	}
