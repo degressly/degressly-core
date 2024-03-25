@@ -1,11 +1,10 @@
 package com.degressly.proxy.core.service.impl;
 
 import com.degressly.proxy.core.dto.DownstreamResult;
-import com.degressly.proxy.core.dto.ResponsesDto;
+import com.degressly.proxy.core.dto.Observation;
 import com.degressly.proxy.core.service.DiffPublisherService;
 import com.degressly.proxy.core.service.MulticastProxyService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -146,7 +145,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 			}
 		}
 
-		ResponsesDto responsesDto = ResponsesDto.builder()
+		Observation observation = Observation.builder()
 			.traceId(traceId)
 			.requestUrl(requestUrl)
 			.primaryResult(downstreamResults.get(0))
@@ -155,7 +154,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 			.build();
 
 		for (DiffPublisherService publisher : publishers) {
-			publisher.publish(responsesDto);
+			publisher.publish(observation);
 		}
 	}
 

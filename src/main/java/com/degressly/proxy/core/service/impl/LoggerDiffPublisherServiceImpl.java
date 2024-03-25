@@ -1,7 +1,7 @@
 package com.degressly.proxy.core.service.impl;
 
 import com.degressly.proxy.core.dto.DownstreamResult;
-import com.degressly.proxy.core.dto.ResponsesDto;
+import com.degressly.proxy.core.dto.Observation;
 import com.degressly.proxy.core.service.DiffPublisherService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +13,10 @@ public class LoggerDiffPublisherServiceImpl implements DiffPublisherService {
 	Logger logger = LoggerFactory.getLogger(LoggerDiffPublisherServiceImpl.class);
 
 	@Override
-	public void publish(ResponsesDto responsesDto) {
-		DownstreamResult primaryResult = responsesDto.getPrimaryResult();
-		DownstreamResult secondaryResult = responsesDto.getSecondaryResult();
-		DownstreamResult candidateResult = responsesDto.getCandidateResult();
+	public void publish(Observation observation) {
+		DownstreamResult primaryResult = observation.getPrimaryResult();
+		DownstreamResult secondaryResult = observation.getSecondaryResult();
+		DownstreamResult candidateResult = observation.getCandidateResult();
 		logger.info("Primary Exception:", primaryResult.getException());
 		logger.info("Primary Http Response: {}", primaryResult.getHttpResponse());
 		logger.info("Secondary Exception:", secondaryResult.getException());

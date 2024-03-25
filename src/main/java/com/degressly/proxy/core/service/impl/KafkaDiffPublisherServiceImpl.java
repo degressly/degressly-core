@@ -1,31 +1,21 @@
 package com.degressly.proxy.core.service.impl;
 
-import com.degressly.proxy.core.dto.ResponsesDto;
+import com.degressly.proxy.core.dto.Observation;
 import com.degressly.proxy.core.kafka.ProducerTemplate;
 import com.degressly.proxy.core.service.DiffPublisherService;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.ObjectError;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static com.degressly.proxy.core.Constants.TRACE_ID;
 
 @Service
 @ConditionalOnProperty("diff.publisher.bootstrap-servers")
@@ -39,7 +29,7 @@ public class KafkaDiffPublisherServiceImpl implements DiffPublisherService {
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Override
-	public void publish(ResponsesDto result) {
+	public void publish(Observation result) {
 		try {
 			Map<String, Object> map = objectMapper.convertValue(result, new TypeReference<>() {
 			});
