@@ -27,10 +27,13 @@ Run degressly-core with:
 
 ### Config flags (VM options)
 
-| Flag                             | Example        | Description                                                                  |
-|----------------------------------|----------------|------------------------------------------------------------------------------|
-| diff.publisher.bootstrap-servers | localhost:9092 | Address of kafka bootstrap servers for integration with degressly-comparator |
-| diff.publisher.topic-name        | diff_stream    | Kafka topic name for integration with degressly-comparator                   |
+| Flag                             | Example               | Description                                                                  |
+|----------------------------------|-----------------------|------------------------------------------------------------------------------|
+| diff.publisher.bootstrap-servers | localhost:9092        | Address of kafka bootstrap servers for integration with degressly-comparator |
+| diff.publisher.topic-name        | diff_stream           | Kafka topic name for integration with degressly-comparator                   |
+| primary.host                     | http://localhost:9000 | Forwarding address of primary instance                                       |
+| secondary.host                   | http://localhost:9001 | Forwarding address of secondary instance                                     |
+| candidate.host                   | http://localhost:9002 | Forwarding address of candidate instance                                     |
 
 ## Support
 
