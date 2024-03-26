@@ -147,7 +147,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 		Observation observation = Observation.builder()
 			.traceId(traceId)
-			.requestUrl(requestUrl)
+			.requestUrl(requestUrl).observationType("RESPONSE")
 			.primaryResult(downstreamResults.get(0))
 			.secondaryResult(downstreamResults.get(1))
 			.candidateResult(downstreamResults.get(2))
