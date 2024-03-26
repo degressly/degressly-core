@@ -141,7 +141,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 				downstreamResult.setHttpResponse(response);
 			}
 			catch (Exception e) {
-				downstreamResult.setException(e);
+				downstreamResult.setException(e.getMessage());
 			}
 		}
 

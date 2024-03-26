@@ -8,6 +8,6 @@ public class DownstreamResult {
 
 	private ResponseEntity httpResponse;
 
-	private Exception exception;
+	private String exception;
 
 }

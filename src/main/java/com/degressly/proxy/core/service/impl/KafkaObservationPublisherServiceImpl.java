@@ -51,12 +51,12 @@ public class KafkaObservationPublisherServiceImpl implements ObservationPublishe
 				(Map<String, Object>) map.get("candidateResult")));
 
 		for (Map<String, Object> resultMap : resultMapList) {
-			Map<String, Object> httpResponse = (Map<String, Object>) resultMap.get("httpResponse");
 			try {
+				Map<String, Object> httpResponse = (Map<String, Object>) resultMap.get("httpResponse");
 				JsonNode node = objectMapper.readValue((String) httpResponse.get("body"), JsonNode.class);
 				httpResponse.put("body", node);
 			}
-			catch (JsonProcessingException e) {
+			catch (Exception e) {
 				// Do nothing
 			}
 		}
