@@ -35,6 +35,14 @@ Run degressly-core with:
 | secondary.host                   | http://localhost:9001 | Forwarding address of secondary instance                                     |
 | candidate.host                   | http://localhost:9002 | Forwarding address of candidate instance                                     |
 
+## Limitations / TODO
+_In no particular order:_
+* Flag to configure which instance user response is served from(in staging environments, QA teams will expect outputs of candidate instance and not primary).
+* DB layer observation recon (comparator can consume from debezium or similar CDC pipeline).
+* DB Proxy...?
+* Performance regression tracking.
+* Dockerization.
+
 ## Support
 
 If you would like to reach out for support or feature requests, feel free to drop an email at [me@daniyaalkhan.com](mailto:me@daniyaalkhan.com)
