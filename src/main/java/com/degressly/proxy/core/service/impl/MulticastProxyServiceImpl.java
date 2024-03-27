@@ -40,6 +40,9 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 	@Value("${candidate.host}")
 	private String CANDIDATE_HOST;
 
+	@Value("${return.response.from:PRIMARY}")
+	private String RETURN_RESPONSE_FROM;
+
 	@Autowired
 	List<ObservationPublisherService> publishers = Collections.emptyList();
 
@@ -72,7 +75,12 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 				primaryResponseFuture, secondaryResponseFuture, candidateResponseFuture));
 
 		try {
-			return primaryResponseFuture.get();
+			return switch (RETURN_RESPONSE_FROM) {
+				case "SECONDARY" -> secondaryResponseFuture.get();
+				case "CANDIDATE" -> candidateResponseFuture.get();
+				default -> primaryResponseFuture.get();
+			};
+
 		}
 		catch (InterruptedException | ExecutionException e) {
 			return ResponseEntity.internalServerError().build();
@@ -147,7 +155,8 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 		Observation observation = Observation.builder()
 			.traceId(traceId)
-			.requestUrl(requestUrl).observationType("RESPONSE")
+			.requestUrl(requestUrl)
+			.observationType("RESPONSE")
 			.primaryResult(downstreamResults.get(0))
 			.secondaryResult(downstreamResults.get(1))
 			.candidateResult(downstreamResults.get(2))

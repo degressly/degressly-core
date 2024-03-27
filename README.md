@@ -27,17 +27,17 @@ Run degressly-core with:
 
 ### Config flags (VM options)
 
-| Flag                             | Example               | Description                                                                  |
-|----------------------------------|-----------------------|------------------------------------------------------------------------------|
-| diff.publisher.bootstrap-servers | localhost:9092        | Address of kafka bootstrap servers for integration with degressly-comparator |
-| diff.publisher.topic-name        | diff_stream           | Kafka topic name for integration with degressly-comparator                   |
-| primary.host                     | http://localhost:9000 | Forwarding address of primary instance                                       |
-| secondary.host                   | http://localhost:9001 | Forwarding address of secondary instance                                     |
-| candidate.host                   | http://localhost:9002 | Forwarding address of candidate instance                                     |
+| Flag                             | Example                                    | Description                                                                  |
+|----------------------------------|--------------------------------------------|------------------------------------------------------------------------------|
+| diff.publisher.bootstrap-servers | localhost:9092                             | Address of kafka bootstrap servers for integration with degressly-comparator |
+| diff.publisher.topic-name        | diff_stream                                | Kafka topic name for integration with degressly-comparator                   |
+| primary.host                     | http://localhost:9000                      | Forwarding address of primary instance                                       |
+| secondary.host                   | http://localhost:9001                      | Forwarding address of secondary instance                                     |
+| candidate.host                   | http://localhost:9002                      | Forwarding address of candidate instance                                     |
+| return.response.from             | PRIMARY(default) \| SECONDARY \| CANDIDATE | Which instance's response is to be returned to the user.                     |
 
 ## Limitations / TODO
 _In no particular order:_
-* Flag to configure which instance user response is served from(in staging environments, QA teams will expect outputs of candidate instance and not primary).
 * DB layer observation recon (comparator can consume from debezium or similar CDC pipeline).
 * DB Proxy...?
 * Performance regression tracking.
