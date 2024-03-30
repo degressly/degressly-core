@@ -1,6 +1,10 @@
-FROM openjdk:21-jdk
+FROM maven:3.9.6-amazoncorretto-21
 
 WORKDIR /app
+
+ADD pom.xml .
+
+RUN mvn clean verify --fail-never
 
 ARG diff_publisher_bootstrap_servers=false
 ARG diff_publisher_topic_name=diff_stream

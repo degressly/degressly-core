@@ -28,18 +28,11 @@ Run degressly-core with:
 ### Docker
 
 ```
-docker build -f Dockerfile.quickstart -t degressly-core-quickstart:latest
-docker run -p8000:8000 degressly-core-quickstart:latest
+docker build -f Dockerfile -t degressly-core:latest
+docker run -p8000:8000 degressly-core:latest
 ```
 
-## Docker setup for development
-Due to the structure of maven, the quick start Dockerfile downloads dependencies on each build. For development setup, follow these steps:
-1. Compile application:
-   * `./mvnw clean package`
-2. Build Docker image:
-   * `docker build -t degressly-core:latest .  `
-3. Run container:
-    * `docker run -p8000:8000 degressly-core:latest `
+
 
 ### Config flags
 
