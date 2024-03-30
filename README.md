@@ -22,6 +22,12 @@ The degressly ecosystem depends on the following repositories:
 
 ## Quick start
 
+Clone repository:
+```
+git clone https://github.com/degressly/degressly-core.git
+cd degressly-core
+```
+
 Run degressly-core with:
 ```mvn spring-boot:run```
 
