@@ -57,8 +57,8 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 	ExecutorService publisherExecutorService = Executors.newCachedThreadPool();
 
 	@Override
-	public ResponseEntity getResponse(HttpServletRequest httpServletRequest,
-									  MultiValueMap<String, String> headers, MultiValueMap<String, String> params, String body) {
+	public ResponseEntity getResponse(HttpServletRequest httpServletRequest, MultiValueMap<String, String> headers,
+			MultiValueMap<String, String> params, String body) {
 
 		String traceId = MDC.get(TRACE_ID);
 

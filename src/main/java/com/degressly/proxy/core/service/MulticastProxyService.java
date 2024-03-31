@@ -6,7 +6,7 @@ import org.springframework.util.MultiValueMap;
 
 public interface MulticastProxyService {
 
-	public ResponseEntity getResponse(HttpServletRequest httpServletRequest,
-									  MultiValueMap<String, String> headers, MultiValueMap<String, String> params, String body);
+	public ResponseEntity getResponse(HttpServletRequest httpServletRequest, MultiValueMap<String, String> headers,
+			MultiValueMap<String, String> params, String body);
 
 }
