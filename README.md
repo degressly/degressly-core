@@ -34,7 +34,7 @@ docker build -f Dockerfile -t degressly-core:latest
 docker run -p8000:8000 degressly-core:latest
 ```
 
-### Running with docker-compose (for integration with other degressly services)
+### Running with docker-compose
 
 Create .env file:
 ```bash
@@ -44,8 +44,7 @@ nano .env
 
 Sample `.env` file:
 ```
-diff_publisher_bootstrap-servers=kafka:9092
-diff_publisher_topic-name=diff_stream
+diff_publisher_bootstrap-servers=false
 ```
 
 ```bash
@@ -53,6 +52,34 @@ docker build -f Dockerfile -t degressly-core:latest
 docker compose up
 ```
 
+
+### Running full degressly ecosystem with docker-compose:
+Clone all repos and build docker images:
+```bash
+git clone https://github.com/degressly/degressly-core.git
+git clone https://github.com/degressly/degressly-comparator.git
+docker build degressly-core/ -t degressly-core:latest 
+docker build degressly-comparator/ -t degressly-comparator:latest 
+cd degressly-core
+```
+
+Create .env file:
+```bash
+touch .env
+```
+```
+spring_profiles_active=mongo
+diff_publisher_bootstrap-servers=kafka:9092
+diff_publisher_topic-name=diff_stream
+MONGO_URL=<mongo_cluster_url>/<mongo_db_name>
+MONGO_USERNAME=<mongo_username>
+MONGO_PASSWORD=<mongo_password>
+MONGO_DBNAME=<mongo_db_name>
+```
+Run containers
+```bash
+docker compose --profile full up
+```
 
 ### Config flags
 
