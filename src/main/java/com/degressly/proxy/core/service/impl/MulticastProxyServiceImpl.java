@@ -57,8 +57,8 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 	ExecutorService publisherExecutorService = Executors.newCachedThreadPool();
 
 	@Override
-	public ResponseEntity getResponseFromPrimary(HttpServletRequest httpServletRequest,
-			MultiValueMap<String, String> headers, MultiValueMap<String, String> params, String body) {
+	public ResponseEntity getResponse(HttpServletRequest httpServletRequest,
+									  MultiValueMap<String, String> headers, MultiValueMap<String, String> params, String body) {
 
 		String traceId = MDC.get(TRACE_ID);
 
@@ -90,6 +90,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 	private ResponseEntity getResponse(String host, HttpServletRequest httpServletRequest,
 			MultiValueMap<String, String> headers, MultiValueMap<String, String> params, String body) {
 
+		headers.put("x-degressly-trace-id", Collections.singletonList(MDC.get(TRACE_ID)));
 		var restTemplate = new RestTemplate();
 		var httpEntity = new HttpEntity<>(body, headers);
 		var queryParams = new HashMap<String, String>();

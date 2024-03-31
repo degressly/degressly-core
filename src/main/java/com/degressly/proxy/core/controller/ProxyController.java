@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.UUID;
 
 import static com.degressly.proxy.core.Constants.TRACE_ID;
@@ -34,7 +33,7 @@ public class ProxyController {
 			MDC.put(TRACE_ID, UUID.randomUUID().toString());
 		}
 
-		return multicastProxyService.getResponseFromPrimary(request, headers, params, body);
+		return multicastProxyService.getResponse(request, headers, params, body);
 	}
 
 }

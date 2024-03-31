@@ -20,7 +20,8 @@ ENV secondary_host=$secondary_host
 ENV candidate_host=$candidate_host
 ENV return_response_from=$return_response_from
 
-COPY target/core-0.0.1-SNAPSHOT.jar .
+COPY . .
+RUN mvn clean package
 
 EXPOSE 8000
 
@@ -31,5 +32,5 @@ ENTRYPOINT ["java", "-jar", \
         "-Dsecondary.host=${secondary_host}", \
         "-Dcandidate.host=${candidate_host}", \
         "-Dreturn.response.from=${return_response_from}", \
-        "core-0.0.1-SNAPSHOT.jar" \
+        "target/core-0.0.1-SNAPSHOT.jar" \
     ]
