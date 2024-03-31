@@ -61,8 +61,10 @@ Clone all repos and build docker images:
 ```bash
 git clone https://github.com/degressly/degressly-core.git
 git clone https://github.com/degressly/degressly-comparator.git
+git clone https://github.com/degressly/degressly-downstream.git
 docker build degressly-core/ -t degressly-core:latest 
 docker build degressly-comparator/ -t degressly-comparator:latest 
+docker build degressly-downstream/ -t degressly-downstream:latest 
 cd degressly-core
 ```
 

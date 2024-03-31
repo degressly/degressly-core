@@ -6,10 +6,8 @@ services:
     container_name: degressly-core
     networks:
       - degressly_network
-
     ports:
       - "8000:8000"
-
     env_file:
       - .env
 
@@ -32,12 +30,13 @@ services:
     image: confluentinc/cp-kafka:7.4.4
     depends_on:
       - zookeeper
-
     container_name: kafka
     networks:
       - degressly_network
     ports:
       - "9092:29092"
+    profiles:
+      - full
     environment:
       KAFKA_LISTENERS: EXTERNAL_SAME_HOST://:29092,INTERNAL://:9092
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL_SAME_HOST://localhost:29092
@@ -47,9 +46,6 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-    profiles:
-      - full
-
   degressly-comparator:
     image: degressly-comparator
     container_name: degressly-comparator
@@ -57,10 +53,20 @@ services:
       - degressly_network
     env_file:
       - .env
-
     depends_on:
       - kafka
+    profiles:
+      - full
 
+  degressly-downstream:
+    image: degressly-downstream
+    container_name: degressly-downstream
+    networks:
+      - degressly_network
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
     profiles:
       - full
 
