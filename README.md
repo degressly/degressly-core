@@ -44,8 +44,11 @@ nano .env
 
 Sample `.env` file:
 ```
-diff_publisher_bootstrap-servers=false
+primary_host=http://host.docker.internal:9000
+secondary_host=http://host.docker.internal:9001
+candidate_host=http://host.docker.internal:9002
 ```
+_Note on host names: https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host_
 
 ```bash
 docker build -f Dockerfile -t degressly-core:latest
@@ -71,11 +74,16 @@ touch .env
 spring_profiles_active=mongo
 diff_publisher_bootstrap-servers=kafka:9092
 diff_publisher_topic-name=diff_stream
+primary_host=http://host.docker.internal:9000
+secondary_host=http://host.docker.internal:9001
+candidate_host=http://host.docker.internal:9002
 MONGO_URL=<mongo_cluster_url>/<mongo_db_name>
 MONGO_USERNAME=<mongo_username>
 MONGO_PASSWORD=<mongo_password>
 MONGO_DBNAME=<mongo_db_name>
 ```
+_Note on host names: https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host_ 
+
 Run containers
 ```bash
 docker compose --profile full up
