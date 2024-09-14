@@ -91,7 +91,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
 		requestHeaders.forEach((requestHeader, value) -> {
-			if(!HEADERS_TO_SKIP.contains(requestHeader)) {
+			if (!HEADERS_TO_SKIP.contains(requestHeader)) {
 				headers.put(requestHeader, value);
 			}
 		});
@@ -118,18 +118,19 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 					e.getResponseHeaders(), e.getResponseBodyAsString());
 			return new ResponseEntity(e.getResponseBodyAsString(), e.getResponseHeaders(),
 					HttpStatus.valueOf(e.getStatusCode().value()));
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			logger.info("Exception when calling downstream", e);
 			return new ResponseEntity(HttpStatusCode.valueOf(500));
 		}
 
 		MultiValueMap<String, String> responseHeaders = new LinkedMultiValueMap<>();
 
-//		response.getHeaders().forEach((header, value) -> {
-//			if (!HEADERS_TO_SKIP.contains(header)) {
-//			responseHeaders.put(header, value);
-//			}
-//		});
+		// response.getHeaders().forEach((header, value) -> {
+		// if (!HEADERS_TO_SKIP.contains(header)) {
+		// responseHeaders.put(header, value);
+		// }
+		// });
 
 		return new ResponseEntity(response.getBody(), responseHeaders, HttpStatus.OK);
 

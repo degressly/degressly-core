@@ -95,8 +95,8 @@ docker compose --profile full up
 
 | VM Options (When running jar)    | Environment Variables (When using Docker) | Example                                                  | Description                                                                  |
 |----------------------------------|-------------------------------------------|----------------------------------------------------------|------------------------------------------------------------------------------|
-| diff.publisher.bootstrap-servers | diff_publisher_bootstrap-servers          | false(default)                             \| kafka:9092 | Address of kafka bootstrap servers for integration with degressly-comparator |
-| diff.publisher.topic-name        | diff_publisher_topic-name                 | diff_stream                                              | Kafka topic name for integration with degressly-comparator                   |
+| diff.publisher.bootstrap-servers | diff_publisher_bootstrap_servers          | false(default)                             \| kafka:9092 | Address of kafka bootstrap servers for integration with degressly-comparator |
+| diff.publisher.topic-name        | diff_publisher_topic_name                 | diff_stream                                              | Kafka topic name for integration with degressly-comparator                   |
 | primary.host                     | primary_host                              | http://localhost:9000 / http://host.docker.internal:9000 | Forwarding address of primary instance                                       |
 | secondary.host                   | secondary_host                            | http://localhost:9001 / http://host.docker.internal:9001 | Forwarding address of secondary instance                                     |
 | candidate.host                   | candidate_host                            | http://localhost:9002 / http://host.docker.internal:9002 | Forwarding address of candidate instance                                     |

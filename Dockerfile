@@ -13,8 +13,8 @@ ARG secondary_host=http://host.docker.internal:9001
 ARG candidate_host=http://host.docker.internal:9002
 ARG return_response_from=PRIMARY
 
-ENV diff_publisher_bootstrap-servers=${diff_publisher_bootstrap_servers}
-ENV diff_publisher_topic-name=${diff_publisher_topic_name}
+ENV diff_publisher_bootstrap_servers=${diff_publisher_bootstrap_servers}
+ENV diff_publisher_topic_name=${diff_publisher_topic_name}
 ENV primary_host=$primary_host
 ENV secondary_host=$secondary_host
 ENV candidate_host=$candidate_host
@@ -26,8 +26,8 @@ RUN mvn clean package
 EXPOSE 8000
 
 ENTRYPOINT ["java", "-jar", \
-        "-Ddiff.publisher.bootstrap-servers=${diff_publisher_bootstrap-servers}", \
-        "-Ddiff.publisher.topic-name=${diff_publisher_topic-name}", \
+        "-Ddiff.publisher.bootstrap-servers=${diff_publisher_bootstrap_servers}", \
+        "-Ddiff.publisher.topic-name=${diff_publisher_topic_name}", \
         "-Dprimary.host=${primary_host}", \
         "-Dsecondary.host=${secondary_host}", \
         "-Dcandidate.host=${candidate_host}", \
