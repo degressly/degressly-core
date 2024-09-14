@@ -33,7 +33,8 @@ public class ProxyController {
 			MDC.put(TRACE_ID, UUID.randomUUID().toString());
 		}
 
-		return multicastProxyService.getResponse(request, headers, params, body);
+		ResponseEntity resp = multicastProxyService.getResponse(request, headers, params, body);
+		return resp;
 	}
 
 }

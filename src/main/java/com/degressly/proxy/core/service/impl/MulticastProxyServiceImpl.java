@@ -10,11 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static com.degressly.proxy.core.Constants.HEADERS_TO_SKIP;
 import static com.degressly.proxy.core.Constants.TRACE_ID;
 
 @Service
@@ -88,7 +87,14 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 	}
 
 	private ResponseEntity getResponse(String host, HttpServletRequest httpServletRequest,
-			MultiValueMap<String, String> headers, MultiValueMap<String, String> params, String body) {
+			MultiValueMap<String, String> requestHeaders, MultiValueMap<String, String> params, String body) {
+
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+		requestHeaders.forEach((requestHeader, value) -> {
+			if(!HEADERS_TO_SKIP.contains(requestHeader)) {
+				headers.put(requestHeader, value);
+			}
+		});
 
 		headers.put("x-degressly-trace-id", Collections.singletonList(MDC.get(TRACE_ID)));
 		var restTemplate = new RestTemplate();
@@ -112,9 +118,20 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 					e.getResponseHeaders(), e.getResponseBodyAsString());
 			return new ResponseEntity(e.getResponseBodyAsString(), e.getResponseHeaders(),
 					HttpStatus.valueOf(e.getStatusCode().value()));
+		} catch (Exception e) {
+			logger.info("Exception when calling downstream", e);
+			return new ResponseEntity(HttpStatusCode.valueOf(500));
 		}
 
-		return new ResponseEntity(response.getBody(), response.getHeaders(), HttpStatus.OK);
+		MultiValueMap<String, String> responseHeaders = new LinkedMultiValueMap<>();
+
+//		response.getHeaders().forEach((header, value) -> {
+//			if (!HEADERS_TO_SKIP.contains(header)) {
+//			responseHeaders.put(header, value);
+//			}
+//		});
+
+		return new ResponseEntity(response.getBody(), responseHeaders, HttpStatus.OK);
 
 	}
 
