@@ -5,6 +5,7 @@ import com.degressly.proxy.core.dto.Observation;
 import com.degressly.proxy.core.service.ObservationPublisherService;
 import com.degressly.proxy.core.service.MulticastProxyService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -27,6 +28,7 @@ import java.util.concurrent.Future;
 import static com.degressly.proxy.core.Constants.HEADERS_TO_SKIP;
 import static com.degressly.proxy.core.Constants.TRACE_ID;
 
+@Slf4j
 @Service
 public class MulticastProxyServiceImpl implements MulticastProxyService {
 
@@ -41,6 +43,8 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 	@Value("${return.response.from:PRIMARY}")
 	private String RETURN_RESPONSE_FROM;
+
+	private final RestTemplate restTemplate = new RestTemplate();
 
 	@Autowired
 	List<ObservationPublisherService> publishers = Collections.emptyList();
@@ -82,6 +86,7 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 		}
 		catch (InterruptedException | ExecutionException e) {
+			log.error("Error while requesting downstream", e);
 			return ResponseEntity.internalServerError().build();
 		}
 	}
@@ -97,7 +102,6 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 		});
 
 		headers.put("x-degressly-trace-id", Collections.singletonList(MDC.get(TRACE_ID)));
-		var restTemplate = new RestTemplate();
 		var httpEntity = new HttpEntity<>(body, headers);
 		var queryParams = new HashMap<String, String>();
 
@@ -125,12 +129,6 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 		}
 
 		MultiValueMap<String, String> responseHeaders = new LinkedMultiValueMap<>();
-
-		// response.getHeaders().forEach((header, value) -> {
-		// if (!HEADERS_TO_SKIP.contains(header)) {
-		// responseHeaders.put(header, value);
-		// }
-		// });
 
 		return new ResponseEntity(response.getBody(), responseHeaders, HttpStatus.OK);
 
