@@ -13,12 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.http.HttpClient;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -66,13 +67,13 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 		String traceId = MDC.get(TRACE_ID);
 
 		Future<ResponseEntity> primaryResponseFuture = primaryExecutorService
-			.submit(() -> getResponse(PRIMARY_HOST, httpServletRequest, headers, params, body));
+			.submit(() -> getResponse(traceId, PRIMARY_HOST, httpServletRequest, headers, params, body));
 
 		Future<ResponseEntity> secondaryResponseFuture = secondaryExecutorService
-			.submit(() -> getResponse(SECONDARY_HOST, httpServletRequest, headers, params, body));
+			.submit(() -> getResponse(traceId, SECONDARY_HOST, httpServletRequest, headers, params, body));
 
 		Future<ResponseEntity> candidateResponseFuture = candidateExecutorService
-			.submit(() -> getResponse(CANDIDATE_HOST, httpServletRequest, headers, params, body));
+			.submit(() -> getResponse(traceId, CANDIDATE_HOST, httpServletRequest, headers, params, body));
 
 		publisherExecutorService.submit(() -> publishResponses(traceId, httpServletRequest.getRequestURI(),
 				primaryResponseFuture, secondaryResponseFuture, candidateResponseFuture));
@@ -91,17 +92,12 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 		}
 	}
 
-	private ResponseEntity getResponse(String host, HttpServletRequest httpServletRequest,
+	private ResponseEntity getResponse(String traceId, String host, HttpServletRequest httpServletRequest,
 			MultiValueMap<String, String> requestHeaders, MultiValueMap<String, String> params, String body) {
 
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-		requestHeaders.forEach((requestHeader, value) -> {
-			if (!HEADERS_TO_SKIP.contains(requestHeader)) {
-				headers.put(requestHeader, value);
-			}
-		});
+		MultiValueMap<String, String> headers = skipRestrictedHeaders(requestHeaders);
 
-		headers.put("x-degressly-trace-id", Collections.singletonList(MDC.get(TRACE_ID)));
+		headers.put("x-degressly-trace-id", Collections.singletonList(traceId));
 		var httpEntity = new HttpEntity<>(body, headers);
 		var queryParams = new HashMap<String, String>();
 
@@ -117,21 +113,34 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 					response.getHeaders(), response.getBody());
 
 		}
-		catch (HttpClientErrorException e) {
+		catch (RestClientResponseException e) {
 			logger.info("Response for for url {}: Status: {} Headers: {}, Body: {}", finalUrl, e.getStatusCode(),
 					e.getResponseHeaders(), e.getResponseBodyAsString());
-			return new ResponseEntity(e.getResponseBodyAsString(), e.getResponseHeaders(),
+			return new ResponseEntity(e.getResponseBodyAsString(), skipRestrictedHeaders(e.getResponseHeaders()),
 					HttpStatus.valueOf(e.getStatusCode().value()));
 		}
 		catch (Exception e) {
-			logger.info("Exception when calling downstream", e);
-			return new ResponseEntity(HttpStatusCode.valueOf(500));
+			logger.info("Exception when calling downstream {}", e.getClass().getCanonicalName(), e);
+			throw e;
 		}
 
-		MultiValueMap<String, String> responseHeaders = new LinkedMultiValueMap<>();
+		return new ResponseEntity(response.getBody(), skipRestrictedHeaders(response.getHeaders()), HttpStatus.OK);
 
-		return new ResponseEntity(response.getBody(), responseHeaders, HttpStatus.OK);
+	}
 
+	private static MultiValueMap<String, String> skipRestrictedHeaders(MultiValueMap<String, String> requestHeaders) {
+
+		if (CollectionUtils.isEmpty(requestHeaders)) {
+			return new LinkedMultiValueMap<>();
+		}
+
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+		requestHeaders.forEach((requestHeader, value) -> {
+			if (!HEADERS_TO_SKIP.contains(requestHeader)) {
+				headers.put(requestHeader, value);
+			}
+		});
+		return headers;
 	}
 
 	private static String getFinalUrl(String host, HttpServletRequest httpServletRequest,
@@ -163,7 +172,9 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 			try {
 				ResponseEntity response = responseFuture.get();
-				downstreamResult.setHttpResponse(response);
+				downstreamResult.setStatusCode(response.getStatusCode().toString());
+				downstreamResult.setHeaders(response.getHeaders());
+				downstreamResult.setBody((String) response.getBody());
 			}
 			catch (Exception e) {
 				downstreamResult.setException(e.getMessage());
