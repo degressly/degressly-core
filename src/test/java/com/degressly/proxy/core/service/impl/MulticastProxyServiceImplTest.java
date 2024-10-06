@@ -108,9 +108,9 @@ public class MulticastProxyServiceImplTest {
 		var capturedObservation = observationArgumentCaptor.getValue();
 		Assert.assertEquals("/test", capturedObservation.getRequestUrl());
 		Assert.assertEquals("RESPONSE", capturedObservation.getObservationType());
-		Assert.assertEquals(primaryResponse, capturedObservation.getPrimaryResult().getHttpResponse());
-		Assert.assertEquals(secondaryResponse, capturedObservation.getSecondaryResult().getHttpResponse());
-		Assert.assertEquals(candidateResponse, capturedObservation.getCandidateResult().getHttpResponse());
+		Assert.assertEquals(primaryResponse.getBody(), capturedObservation.getPrimaryResult().getBody());
+		Assert.assertEquals(secondaryResponse.getBody(), capturedObservation.getSecondaryResult().getBody());
+		Assert.assertEquals(candidateResponse.getBody(), capturedObservation.getCandidateResult().getBody());
 
 		// Verify that response returned is according to RETURN_RESPONSE_FROM variable
 		Assert.assertEquals(primaryResponse, multicastResponse);
