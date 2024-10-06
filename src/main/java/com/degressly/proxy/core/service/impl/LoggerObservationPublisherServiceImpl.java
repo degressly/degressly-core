@@ -18,11 +18,11 @@ public class LoggerObservationPublisherServiceImpl implements ObservationPublish
 		DownstreamResult secondaryResult = observation.getSecondaryResult();
 		DownstreamResult candidateResult = observation.getCandidateResult();
 		logger.info("Primary Exception:", primaryResult.getException());
-		logger.info("Primary Http Response: {}", primaryResult.getHttpResponse());
+		logger.info("Primary Http Response: {}", primaryResult.getBody());
 		logger.info("Secondary Exception:", secondaryResult.getException());
-		logger.info("Secondary Http Response: {}", secondaryResult.getHttpResponse());
+		logger.info("Secondary Http Response: {}", secondaryResult.getBody());
 		logger.info("Candidate Exception:", candidateResult.getException());
-		logger.info("Candidate Http Response: {}", candidateResult.getHttpResponse());
+		logger.info("Candidate Http Response: {}", candidateResult.getBody());
 	}
 
 }
