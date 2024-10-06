@@ -9,6 +9,8 @@ Degressly is a portmanteau of "Deterministic Regression". Inspired by [opendiffy
 Degressly works by running three parallel instances of your code side by side and multicasting all inbound requests to all three instances. The primary and secondary instances run your last known good code, while the candidate instances runs code that is to be tested.
 Differences between primary and candidate instances involve noise from non-deterministic sources like random number generation and timestamps, these differences are ignored based on the differences obtained from responses of primary and secondary instances.
 
+If you want a quick and dirty way to try out degressly with a sample application, check out [degressly/degressly-demo](https://github.com/degressly/degressly-demo).
+
 The degressly ecosystem depends on the following repositories:
 
 | Repository               | Description                                                                                                                                                                                                                                                      |
@@ -74,8 +76,8 @@ touch .env
 ```
 ```
 spring_profiles_active=mongo
-diff_publisher_bootstrap-servers=kafka:9092
-diff_publisher_topic-name=diff_stream
+diff_publisher_bootstrap_servers=kafka:9092
+diff_publisher_topic_name=diff_stream
 primary_host=http://host.docker.internal:9000
 secondary_host=http://host.docker.internal:9001
 candidate_host=http://host.docker.internal:9002
