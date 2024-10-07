@@ -65,7 +65,7 @@ public class MulticastProxyServiceImplTest {
 	}
 
 	@Test
-	public void multicastTest() {
+	public void multicastTest() throws InterruptedException {
 
 		var httpServletRequest = getHttpServeletRequest();
 		var headers = getHeaders();
@@ -90,6 +90,10 @@ public class MulticastProxyServiceImplTest {
 
 		ResponseEntity<?> multicastResponse = multicastProxyService.getResponse(httpServletRequest, headers, params,
 				null);
+
+		// Sleep to prevent test from being flaky if primary thread takes longer to
+		// complete
+		Thread.sleep(1000);
 
 		// Verify that all three downstreams have been hit
 		verify(restTemplate).exchange(eq("http://PRIMARY_HOST/test?param1=test"), eq(HttpMethod.POST),
@@ -117,7 +121,7 @@ public class MulticastProxyServiceImplTest {
 	}
 
 	@Test
-	public void verifyReturnFromPrimaryOnExceptionFromSecondary() {
+	public void verifyReturnFromPrimaryOnExceptionFromSecondary() throws InterruptedException {
 
 		var httpServletRequest = getHttpServeletRequest();
 		var headers = getHeaders();
@@ -140,6 +144,10 @@ public class MulticastProxyServiceImplTest {
 
 		ResponseEntity<?> multicastResponse = multicastProxyService.getResponse(httpServletRequest, headers, params,
 				null);
+
+		// Sleep to prevent test from being flaky if primary thread takes longer to
+		// complete
+		Thread.sleep(1000);
 
 		// Verify that all three downstreams have been hit
 		verify(restTemplate).exchange(eq("http://PRIMARY_HOST/test?param1=test"), eq(HttpMethod.POST),
