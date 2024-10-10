@@ -11,6 +11,12 @@ public interface Constants {
 			"Keep-Alive", "keep-alive", "Trailer", "trailer", "Upgrade", "upgrade", "Proxy-Authorization",
 			"proxy-authorization", "Proxy-Authenticate", "proxy-authenticate");
 
+	enum REPLICA_TYPE {
+
+		PRIMARY, SECONDARY, CANDIDATE
+
+	}
+
 	// Set<String> HEADERS_TO_SKIP = Set.of();
 
 }
