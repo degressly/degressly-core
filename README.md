@@ -95,21 +95,22 @@ docker compose --profile full up
 
 ### Config flags
 
-| VM Options (When running jar)    | Environment Variables (When using Docker) | Example                                                  | Description                                                                  |
-|----------------------------------|-------------------------------------------|----------------------------------------------------------|------------------------------------------------------------------------------|
-| diff.publisher.bootstrap-servers | diff_publisher_bootstrap_servers          | false(default)                             \| kafka:9092 | Address of kafka bootstrap servers for integration with degressly-comparator |
-| diff.publisher.topic-name        | diff_publisher_topic_name                 | diff_stream                                              | Kafka topic name for integration with degressly-comparator                   |
-| primary.host                     | primary_host                              | http://localhost:9000 / http://host.docker.internal:9000 | Forwarding address of primary instance                                       |
-| secondary.host                   | secondary_host                            | http://localhost:9001 / http://host.docker.internal:9001 | Forwarding address of secondary instance                                     |
-| candidate.host                   | candidate_host                            | http://localhost:9002 / http://host.docker.internal:9002 | Forwarding address of candidate instance                                     |
-| return.response.from             | return_response_from                      | PRIMARY(default) \| SECONDARY \| CANDIDATE               | Which instance's response is to be returned to the user.                     |
+| VM Options (When running jar)    | Environment Variables (When using Docker) | Example                                                  | Description                                                                                                                                                                                                                        |
+|----------------------------------|-------------------------------------------|----------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| diff.publisher.bootstrap-servers | diff_publisher_bootstrap_servers          | false(default)                             \| kafka:9092 | Address of kafka bootstrap servers for integration with degressly-comparator                                                                                                                                                       |
+| diff.publisher.topic-name        | diff_publisher_topic_name                 | diff_stream                                              | Kafka topic name for integration with degressly-comparator                                                                                                                                                                         |
+| primary.host                     | primary_host                              | http://localhost:9000 / http://host.docker.internal:9000 | Forwarding address of primary instance                                                                                                                                                                                             |
+| secondary.host                   | secondary_host                            | http://localhost:9001 / http://host.docker.internal:9001 | Forwarding address of secondary instance                                                                                                                                                                                           |
+| candidate.host                   | candidate_host                            | http://localhost:9002 / http://host.docker.internal:9002 | Forwarding address of candidate instance                                                                                                                                                                                           |
+| return.response.from             | return_response_from                      | PRIMARY(default) \| SECONDARY \| CANDIDATE               | Which instance's response is to be returned to the user.                                                                                                                                                                           |
+|wait.after.forwarding.to.primary| wait_after_forwarding_to_primary          | 100                                                      | Time to wait(in ms) after sending the request to primary and before sending it to secondary and candidate replicas. May be negative in which case request will be sent to primary and candidate instances before primary instance. |
 
 ## Limitations / TODO
 _In no particular order:_
 * DB layer observation recon (comparator can consume from debezium or similar CDC pipeline).
-* DB Proxy...?
+* ~~DB Proxy...?~~
 * Performance regression tracking.
-* Dockerization.
+* ~~Dockerization.~~
 
 ## Support
 

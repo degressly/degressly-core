@@ -5,6 +5,7 @@ import com.degressly.proxy.core.dto.Observation;
 import com.degressly.proxy.core.service.ObservationPublisherService;
 import com.degressly.proxy.core.service.MulticastProxyService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.http.HttpClient;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -45,6 +45,21 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 	@Value("${return.response.from:PRIMARY}")
 	private String RETURN_RESPONSE_FROM;
 
+	/**
+	 * Specifies the amount of time in milliseconds to wait before sending the request to
+	 * secondary and candidate instances, after the request has been sent to the primary
+	 * instance. May contain negative values, in which case the request will be sent to
+	 * secondary/candidate before being sent to primary; this might be required when live
+	 * cherry-picks from primary are being performed at runtime and the flow requires
+	 * absence of a row for validation.
+	 * <p>
+	 * Please note that this does not account for any external factors such as network
+	 * latency, it is purely the time to put the thread to sleep before initiating the
+	 * call.
+	 */
+	@Value("${wait.after.forwarding.to.primary:0}")
+	private String WAIT_AFTER_FORWARDING_TO_PRIMARY = "0";
+
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	@Autowired
@@ -66,14 +81,14 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 		String traceId = MDC.get(TRACE_ID);
 
-		Future<ResponseEntity> primaryResponseFuture = primaryExecutorService
-			.submit(() -> getResponse(traceId, PRIMARY_HOST, httpServletRequest, headers, params, body));
-
 		Future<ResponseEntity> secondaryResponseFuture = secondaryExecutorService
 			.submit(() -> getResponse(traceId, SECONDARY_HOST, httpServletRequest, headers, params, body));
 
 		Future<ResponseEntity> candidateResponseFuture = candidateExecutorService
 			.submit(() -> getResponse(traceId, CANDIDATE_HOST, httpServletRequest, headers, params, body));
+
+		Future<ResponseEntity> primaryResponseFuture = primaryExecutorService
+			.submit(() -> getResponse(traceId, PRIMARY_HOST, httpServletRequest, headers, params, body));
 
 		publisherExecutorService.submit(() -> publishResponses(traceId, httpServletRequest.getRequestURI(),
 				primaryResponseFuture, secondaryResponseFuture, candidateResponseFuture));
@@ -94,6 +109,8 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 	private ResponseEntity getResponse(String traceId, String host, HttpServletRequest httpServletRequest,
 			MultiValueMap<String, String> requestHeaders, MultiValueMap<String, String> params, String body) {
+
+		waitIfApplicable(host);
 
 		MultiValueMap<String, String> headers = skipRestrictedHeaders(requestHeaders);
 
@@ -192,6 +209,19 @@ public class MulticastProxyServiceImpl implements MulticastProxyService {
 
 		for (ObservationPublisherService publisher : publishers) {
 			publisher.publish(observation);
+		}
+	}
+
+	@SneakyThrows
+	private void waitIfApplicable(String host) {
+		int time = Integer.parseInt(WAIT_AFTER_FORWARDING_TO_PRIMARY);
+		if (PRIMARY_HOST.equals(host) && time < 0) {
+			Thread.sleep(Math.abs(time));
+			return;
+		}
+
+		if (time > 0 && (SECONDARY_HOST.equals(host) || CANDIDATE_HOST.equals(host))) {
+			Thread.sleep(time);
 		}
 	}
 
