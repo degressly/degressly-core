@@ -11,6 +11,8 @@ public interface Constants {
 			"Keep-Alive", "keep-alive", "Trailer", "trailer", "Upgrade", "upgrade", "Proxy-Authorization",
 			"proxy-authorization", "Proxy-Authenticate", "proxy-authenticate");
 
+	String DEGRESSLY_CACHE_POPULATION_REQUEST = "degressly-cache-population-request";
+
 	enum REPLICA_TYPE {
 
 		PRIMARY, SECONDARY, CANDIDATE

@@ -1,7 +1,9 @@
 package com.degressly.proxy.core.controller;
 
-import com.degressly.proxy.core.service.MulticastProxyService;
+import com.degressly.proxy.core.service.MulticastService;
+import com.degressly.proxy.core.service.impl.HttpProxyMulticastServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +16,10 @@ import java.util.UUID;
 import static com.degressly.proxy.core.Constants.TRACE_ID;
 
 @Controller
+@RequiredArgsConstructor
 public class ProxyController {
 
-	@Autowired
-	MulticastProxyService multicastProxyService;
+	private final HttpProxyMulticastServiceImpl multicastService;
 
 	@RequestMapping(value = "/**", method = { RequestMethod.GET, RequestMethod.POST, RequestMethod.HEAD,
 			RequestMethod.OPTIONS, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.TRACE })
@@ -33,7 +35,7 @@ public class ProxyController {
 			MDC.put(TRACE_ID, UUID.randomUUID().toString());
 		}
 
-		ResponseEntity resp = multicastProxyService.getResponse(request, headers, params, body);
+		ResponseEntity resp = multicastService.getResponse(request, headers, params, body);
 		return resp;
 	}
 
