@@ -11,7 +11,7 @@ public class KafkaToHttpServletRequestAdapter {
 	public static GeneratedHttpServletRequest convert(DegresslyRequest degresslyRequest)
 			throws JsonProcessingException {
 		GeneratedHttpServletRequest httpServletRequest = new GeneratedHttpServletRequest();
-		httpServletRequest.setMethod("POST");
+		httpServletRequest.setMethod(degresslyRequest.getMethod());
 		return httpServletRequest;
 
 	}
