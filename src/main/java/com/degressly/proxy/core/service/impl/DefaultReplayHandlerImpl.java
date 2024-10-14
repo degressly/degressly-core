@@ -12,9 +12,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static com.degressly.proxy.core.Constants.DEGRESSLY_CACHE_POPULATION_REQUEST;
@@ -54,8 +57,16 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 		degresslyRequest.getHeaders()
 			.put("x-degressly-trace-id", Collections.singletonList(degresslyRequest.getTraceId()));
 
-		multicastService.getResponse(httpServletRequest, new LinkedMultiValueMap<>(degresslyRequest.getHeaders()),
-				new LinkedMultiValueMap<>(degresslyRequest.getParams()), degresslyRequest.getBody());
+		multicastService.getResponse(httpServletRequest, getMultiValueMap(degresslyRequest.getHeaders()),
+				getMultiValueMap(degresslyRequest.getParams()), degresslyRequest.getBody());
+	}
+
+	private static MultiValueMap<String, String> getMultiValueMap(Map<String, List<String>> originalMap) {
+		if (CollectionUtils.isEmpty(originalMap)) {
+			return new LinkedMultiValueMap<>();
+		}
+
+		return new LinkedMultiValueMap<>(originalMap);
 	}
 
 	private void handleOutgoingRequest(DegresslyRequest degresslyRequest) {
