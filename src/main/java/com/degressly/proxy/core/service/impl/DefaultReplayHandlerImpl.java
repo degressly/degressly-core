@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.degressly.proxy.core.Constants.DEGRESSLY_CACHE_POPULATION_REQUEST;
+import static com.degressly.proxy.core.Constants.TRACE_ID;
 
 @Slf4j
 @Service
@@ -54,8 +56,7 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 			return;
 		}
 
-		degresslyRequest.getHeaders()
-			.put("x-degressly-trace-id", Collections.singletonList(degresslyRequest.getTraceId()));
+		MDC.put(TRACE_ID, degresslyRequest.getTraceId());
 
 		multicastService.getResponse(httpServletRequest, getMultiValueMap(degresslyRequest.getHeaders()),
 				getMultiValueMap(degresslyRequest.getParams()), degresslyRequest.getBody());

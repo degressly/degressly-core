@@ -13,6 +13,8 @@ public class GeneratedHttpServletRequest implements HttpServletRequest {
 
 	private String method;
 
+	private String requestURI;
+
 	@Override
 	public String getMethod() {
 		return this.method;
@@ -20,6 +22,15 @@ public class GeneratedHttpServletRequest implements HttpServletRequest {
 
 	public void setMethod(String method) {
 		this.method = method;
+	}
+
+	@Override
+	public String getRequestURI() {
+		return this.requestURI;
+	}
+
+	public void setRequestURI(String requestURI) {
+		this.requestURI = requestURI;
 	}
 
 	@Override
@@ -95,11 +106,6 @@ public class GeneratedHttpServletRequest implements HttpServletRequest {
 	@Override
 	public String getRequestedSessionId() {
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String getRequestURI() {
-		return "/";
 	}
 
 	@Override
