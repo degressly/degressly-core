@@ -20,6 +20,9 @@ import org.springframework.util.MultiValueMap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.degressly.proxy.core.Constants.DEGRESSLY_CACHE_POPULATION_REQUEST;
 import static com.degressly.proxy.core.Constants.TRACE_ID;
@@ -38,14 +41,18 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 	@Value("${degressly.downstream.host}")
 	private String downstreamHost;
 
+	private final ExecutorService outgoingExecutorService = Executors.newCachedThreadPool();
+
+	private final ExecutorService incomingExecutorService = Executors.newSingleThreadExecutor();
+
 	@Override
 	public void handle(DegresslyRequest degresslyRequest) {
 
 		if ("OUTGOING".equals(degresslyRequest.getType())) {
-			handleOutgoingRequest(degresslyRequest);
+			outgoingExecutorService.submit(() -> handleOutgoingRequest(degresslyRequest));
 		}
 		else {
-			handleIncomingRequest(degresslyRequest);
+			incomingExecutorService.submit(() -> handleIncomingRequest(degresslyRequest));
 		}
 
 	}
