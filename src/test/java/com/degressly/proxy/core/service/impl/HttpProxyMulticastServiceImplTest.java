@@ -1,10 +1,9 @@
 package com.degressly.proxy.core.service.impl;
 
 import com.degressly.proxy.core.dto.Observation;
+import com.degressly.proxy.core.http.HttpClient;
 import com.degressly.proxy.core.service.ObservationPublisherService;
 import jakarta.servlet.http.HttpServletRequest;
-import joptsimple.internal.Reflection;
-import org.jose4j.http.Response;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,19 +21,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class MulticastProxyServiceImplTest {
+public class HttpProxyMulticastServiceImplTest {
 
 	@Mock
 	private ObservationPublisherService publisher1;
@@ -44,20 +41,20 @@ public class MulticastProxyServiceImplTest {
 	private ObservationPublisherService publisher2;
 
 	@Mock
-	private RestTemplate restTemplate;
+	private HttpClient httpClient;
 
 	@Spy
 	private List<ObservationPublisherService> publishers = new ArrayList<>();
 
 	@InjectMocks
-	private MulticastProxyServiceImpl multicastProxyService;
+	private HttpProxyMulticastServiceImpl multicastProxyService;
 
 	@Before
 	public void init() {
 		publishers.add(publisher1);
 		publishers.add(publisher2);
 
-		ReflectionTestUtils.setField(multicastProxyService, "restTemplate", restTemplate);
+		ReflectionTestUtils.setField(multicastProxyService, "httpClient", httpClient);
 		ReflectionTestUtils.setField(multicastProxyService, "RETURN_RESPONSE_FROM", "PRIMARY");
 		ReflectionTestUtils.setField(multicastProxyService, "PRIMARY_HOST", "http://PRIMARY_HOST");
 		ReflectionTestUtils.setField(multicastProxyService, "SECONDARY_HOST", "http://SECONDARY_HOST");
@@ -76,16 +73,15 @@ public class MulticastProxyServiceImplTest {
 		var candidateResponse = new ResponseEntity<>("candidateResponse", new LinkedMultiValueMap<>(), HttpStatus.OK);
 
 		when(httpServletRequest.getRequestURI()).thenReturn("/test");
-		when(httpServletRequest.getMethod()).thenReturn(HttpMethod.POST.name());
 
-		when(restTemplate.exchange(eq("http://PRIMARY_HOST/test?param1=test"), any(HttpMethod.class),
-				any(HttpEntity.class), eq(String.class), anyMap()))
+		when(httpClient.getResponse(any(), eq("http://PRIMARY_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any()))
 			.thenReturn(primaryResponse);
-		when(restTemplate.exchange(eq("http://SECONDARY_HOST/test?param1=test"), any(HttpMethod.class),
-				any(HttpEntity.class), eq(String.class), anyMap()))
+		when(httpClient.getResponse(any(), eq("http://SECONDARY_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any()))
 			.thenReturn(secondaryResponse);
-		when(restTemplate.exchange(eq("http://CANDIDATE_HOST/test?param1=test"), any(HttpMethod.class),
-				any(HttpEntity.class), eq(String.class), anyMap()))
+		when(httpClient.getResponse(any(), eq("http://CANDIDATE_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any()))
 			.thenReturn(candidateResponse);
 
 		ResponseEntity<?> multicastResponse = multicastProxyService.getResponse(httpServletRequest, headers, params,
@@ -96,12 +92,12 @@ public class MulticastProxyServiceImplTest {
 		Thread.sleep(1000);
 
 		// Verify that all three downstreams have been hit
-		verify(restTemplate).exchange(eq("http://PRIMARY_HOST/test?param1=test"), eq(HttpMethod.POST),
-				any(HttpEntity.class), eq(String.class), any(Map.class));
-		verify(restTemplate).exchange(eq("http://SECONDARY_HOST/test?param1=test"), eq(HttpMethod.POST),
-				any(HttpEntity.class), eq(String.class), any(Map.class));
-		verify(restTemplate).exchange(eq("http://CANDIDATE_HOST/test?param1=test"), eq(HttpMethod.POST),
-				any(HttpEntity.class), eq(String.class), any(Map.class));
+		verify(httpClient).getResponse(any(), eq("http://PRIMARY_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any());
+		verify(httpClient).getResponse(any(), eq("http://SECONDARY_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any());
+		verify(httpClient).getResponse(any(), eq("http://CANDIDATE_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any());
 
 		// Verify that observations are published to all publishers
 		ArgumentCaptor<Observation> observationArgumentCaptor = ArgumentCaptor.forClass(Observation.class);
@@ -132,14 +128,14 @@ public class MulticastProxyServiceImplTest {
 		when(httpServletRequest.getRequestURI()).thenReturn("/test");
 		when(httpServletRequest.getMethod()).thenReturn(HttpMethod.POST.name());
 
-		when(restTemplate.exchange(eq("http://PRIMARY_HOST/test?param1=test"), any(HttpMethod.class),
-				any(HttpEntity.class), eq(String.class), anyMap()))
+		when(httpClient.getResponse(any(), eq("http://PRIMARY_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any()))
 			.thenReturn(primaryResponse);
-		when(restTemplate.exchange(eq("http://SECONDARY_HOST/test?param1=test"), any(HttpMethod.class),
-				any(HttpEntity.class), eq(String.class), anyMap()))
+		when(httpClient.getResponse(any(), eq("http://SECONDARY_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any()))
 			.thenThrow(new HttpClientErrorException(HttpStatus.SERVICE_UNAVAILABLE));
-		when(restTemplate.exchange(eq("http://CANDIDATE_HOST/test?param1=test"), any(HttpMethod.class),
-				any(HttpEntity.class), eq(String.class), anyMap()))
+		when(httpClient.getResponse(any(), eq("http://CANDIDATE_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any()))
 			.thenThrow(new RuntimeException());
 
 		ResponseEntity<?> multicastResponse = multicastProxyService.getResponse(httpServletRequest, headers, params,
@@ -150,12 +146,12 @@ public class MulticastProxyServiceImplTest {
 		Thread.sleep(1000);
 
 		// Verify that all three downstreams have been hit
-		verify(restTemplate).exchange(eq("http://PRIMARY_HOST/test?param1=test"), eq(HttpMethod.POST),
-				any(HttpEntity.class), eq(String.class), any(Map.class));
-		verify(restTemplate).exchange(eq("http://SECONDARY_HOST/test?param1=test"), eq(HttpMethod.POST),
-				any(HttpEntity.class), eq(String.class), any(Map.class));
-		verify(restTemplate).exchange(eq("http://CANDIDATE_HOST/test?param1=test"), eq(HttpMethod.POST),
-				any(HttpEntity.class), eq(String.class), any(Map.class));
+		verify(httpClient).getResponse(any(), eq("http://PRIMARY_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any());
+		verify(httpClient).getResponse(any(), eq("http://SECONDARY_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any());
+		verify(httpClient).getResponse(any(), eq("http://CANDIDATE_HOST"), any(HttpServletRequest.class),
+				any(MultiValueMap.class), any(MultiValueMap.class), any());
 
 		// Verify that response returned is according to RETURN_RESPONSE_FROM variable
 		Assert.assertEquals(primaryResponse, multicastResponse);
