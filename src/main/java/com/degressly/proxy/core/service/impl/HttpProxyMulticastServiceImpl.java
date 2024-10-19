@@ -45,13 +45,13 @@ public class HttpProxyMulticastServiceImpl implements MulticastService {
 
 	private final HttpClient httpClient;
 
-	ExecutorService primaryExecutorService = Executors.newCachedThreadPool();
+	private final ExecutorService primaryExecutorService = Executors.newVirtualThreadPerTaskExecutor();
 
-	ExecutorService secondaryExecutorService = Executors.newCachedThreadPool();
+	private final ExecutorService secondaryExecutorService = Executors.newVirtualThreadPerTaskExecutor();
 
-	ExecutorService candidateExecutorService = Executors.newCachedThreadPool();
+	private final ExecutorService candidateExecutorService = Executors.newVirtualThreadPerTaskExecutor();
 
-	ExecutorService publisherExecutorService = Executors.newCachedThreadPool();
+	private final ExecutorService publisherExecutorService = Executors.newVirtualThreadPerTaskExecutor();
 
 	@Override
 	public ResponseEntity getResponse(HttpServletRequest httpServletRequest, MultiValueMap<String, String> headers,
