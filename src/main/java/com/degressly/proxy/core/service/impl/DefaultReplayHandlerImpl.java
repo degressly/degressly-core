@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.degressly.proxy.core.Constants.DEGRESSLY_CACHE_POPULATION_REQUEST;
 import static com.degressly.proxy.core.Constants.TRACE_ID;
@@ -44,6 +45,8 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 
 	private final ExecutorService incomingExecutorService = Executors.newSingleThreadExecutor();
 
+	private Future<?> previousIncomingRequestFuture = null;
+
 	@Override
 	public void handle(DegresslyRequest degresslyRequest) {
 
@@ -51,9 +54,22 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 			outgoingExecutorService.submit(() -> handleOutgoingRequest(degresslyRequest));
 		}
 		else {
-			incomingExecutorService.submit(() -> handleIncomingRequest(degresslyRequest));
+			performOneConcurrentOutgoingRequest(degresslyRequest);
 		}
 
+	}
+
+	private void performOneConcurrentOutgoingRequest(DegresslyRequest degresslyRequest) {
+		if (previousIncomingRequestFuture != null && !previousIncomingRequestFuture.isDone()) {
+			try {
+				previousIncomingRequestFuture.get();
+			}
+			catch (Exception e) {
+				log.error("Error while executing incoming request: ", e);
+			}
+		}
+		previousIncomingRequestFuture = incomingExecutorService
+			.submit(() -> handleIncomingRequest(degresslyRequest));
 	}
 
 	private void handleIncomingRequest(DegresslyRequest degresslyRequest) {
