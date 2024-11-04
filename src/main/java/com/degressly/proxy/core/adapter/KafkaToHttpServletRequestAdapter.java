@@ -4,6 +4,7 @@ import com.degressly.proxy.core.dto.DegresslyRequest;
 import com.degressly.proxy.core.dto.GeneratedHttpServletRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.experimental.UtilityClass;
+import org.springframework.http.HttpMethod;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +15,7 @@ public class KafkaToHttpServletRequestAdapter {
 	public static GeneratedHttpServletRequest convert(DegresslyRequest degresslyRequest)
 			throws JsonProcessingException {
 		GeneratedHttpServletRequest httpServletRequest = new GeneratedHttpServletRequest();
-		httpServletRequest.setMethod(degresslyRequest.getMethod());
+		httpServletRequest.setMethod(HttpMethod.POST.name());
 		httpServletRequest.setRequestURI(getRequestURI(degresslyRequest.getUrl()));
 		return httpServletRequest;
 
