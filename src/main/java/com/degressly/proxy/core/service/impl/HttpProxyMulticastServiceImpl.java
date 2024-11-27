@@ -55,7 +55,7 @@ public class HttpProxyMulticastServiceImpl implements MulticastService {
 
 	@Override
 	public ResponseEntity getResponse(HttpServletRequest httpServletRequest, MultiValueMap<String, String> headers,
-			MultiValueMap<String, String> params, String body) {
+			MultiValueMap<String, String> params, String body, boolean waitForAllReplicas) {
 
 		String traceId = MDC.get(TRACE_ID);
 
@@ -71,6 +71,14 @@ public class HttpProxyMulticastServiceImpl implements MulticastService {
 		publisherExecutorService.submit(() -> publishResponses(traceId, httpServletRequest.getRequestURI(),
 				primaryResponseFuture, secondaryResponseFuture, candidateResponseFuture));
 
+		if (waitForAllReplicas) {
+			// In case of replays, it is a good practice to wait for all replicas to
+			// return to make sure API call sequence is maintained. This is not done in
+			// non-replay flows because it can have a detrimental impact on user
+			// experience.
+			waitForFutures(primaryResponseFuture, secondaryResponseFuture, candidateResponseFuture);
+		}
+
 		try {
 			return switch (RETURN_RESPONSE_FROM) {
 				case "SECONDARY" -> secondaryResponseFuture.get();
@@ -82,6 +90,17 @@ public class HttpProxyMulticastServiceImpl implements MulticastService {
 		catch (InterruptedException | ExecutionException e) {
 			log.error("Error while requesting downstream", e);
 			return ResponseEntity.internalServerError().build();
+		}
+	}
+
+	private void waitForFutures(Future<?>... futures) {
+		for (var future : futures) {
+			try {
+				future.wait();
+			}
+			catch (Exception e) {
+				// Do nothing
+			}
 		}
 	}
 

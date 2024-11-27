@@ -51,11 +51,6 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 
 	private Future<?> previousIncomingRequestFuture = null;
 
-	@PostConstruct
-	public void init() {
-		log.info("delayBetweenOutgoingCalls {}", delayBetweenOutgoingCalls);
-	}
-
 	@Override
 	public void handle(DegresslyRequest degresslyRequest) throws InterruptedException {
 
@@ -63,12 +58,12 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 			outgoingExecutorService.submit(() -> handleOutgoingRequest(degresslyRequest));
 		}
 		else {
-			performOneConcurrentOutgoingRequest(degresslyRequest);
+			performOneConcurrentIncomingRequest(degresslyRequest);
 		}
 
 	}
 
-	private void performOneConcurrentOutgoingRequest(DegresslyRequest degresslyRequest) throws InterruptedException {
+	private void performOneConcurrentIncomingRequest(DegresslyRequest degresslyRequest) throws InterruptedException {
 		if (previousIncomingRequestFuture != null && !previousIncomingRequestFuture.isDone()) {
 			try {
 				previousIncomingRequestFuture.get();
@@ -93,7 +88,7 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 		MDC.put(TRACE_ID, degresslyRequest.getTraceId());
 
 		multicastService.getResponse(httpServletRequest, getMultiValueMap(degresslyRequest.getHeaders()),
-				getMultiValueMap(degresslyRequest.getParams()), degresslyRequest.getBody());
+				getMultiValueMap(degresslyRequest.getParams()), degresslyRequest.getBody(), true);
 	}
 
 	private static MultiValueMap<String, String> getMultiValueMap(Map<String, List<String>> originalMap) {

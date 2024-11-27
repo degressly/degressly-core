@@ -53,7 +53,7 @@ public class HttpClient {
 	 * call.
 	 */
 	@Value("${wait.after.forwarding.to.primary:0}")
-	private String WAIT_AFTER_FORWARDING_TO_PRIMARY = "0";
+	private long WAIT_AFTER_FORWARDING_TO_PRIMARY;
 
 	public ResponseEntity getResponse(String traceId, String host, HttpServletRequest httpServletRequest,
 			MultiValueMap<String, String> requestHeaders, MultiValueMap<String, String> params, String body) {
@@ -122,14 +122,13 @@ public class HttpClient {
 
 	@SneakyThrows
 	private void waitIfApplicable(String host) {
-		int time = Integer.parseInt(WAIT_AFTER_FORWARDING_TO_PRIMARY);
-		if (PRIMARY_HOST.equals(host) && time < 0) {
-			Thread.sleep(Math.abs(time));
+		if (PRIMARY_HOST.equals(host) && WAIT_AFTER_FORWARDING_TO_PRIMARY < 0) {
+			Thread.sleep(Math.abs(WAIT_AFTER_FORWARDING_TO_PRIMARY));
 			return;
 		}
 
-		if (time > 0 && (SECONDARY_HOST.equals(host) || CANDIDATE_HOST.equals(host))) {
-			Thread.sleep(time);
+		if (WAIT_AFTER_FORWARDING_TO_PRIMARY > 0 && (SECONDARY_HOST.equals(host) || CANDIDATE_HOST.equals(host))) {
+			Thread.sleep(WAIT_AFTER_FORWARDING_TO_PRIMARY);
 		}
 	}
 
