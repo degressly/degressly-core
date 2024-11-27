@@ -8,6 +8,7 @@ import com.degressly.proxy.core.http.HttpClient;
 import com.degressly.proxy.core.service.ReplayHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -38,7 +39,7 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	@Value("${degressly.downstream.host}")
+	@Value("${degressly.downstream.host:localhost:8080}")
 	private String downstreamHost;
 
 	@Value("${degressly.delay.between.outgoing.calls:0}")
@@ -49,6 +50,11 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 	private final ExecutorService incomingExecutorService = Executors.newSingleThreadExecutor();
 
 	private Future<?> previousIncomingRequestFuture = null;
+
+	@PostConstruct
+	public void init() {
+		log.info("delayBetweenOutgoingCalls {}", delayBetweenOutgoingCalls);
+	}
 
 	@Override
 	public void handle(DegresslyRequest degresslyRequest) throws InterruptedException {

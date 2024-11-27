@@ -111,6 +111,7 @@ _In no particular order:_
 * ~~DB Proxy...?~~
 * Performance regression tracking.
 * ~~Dockerization.~~
+* Documentation for Replay support.
 
 ## Support
 
