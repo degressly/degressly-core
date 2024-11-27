@@ -41,6 +41,9 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 	@Value("${degressly.downstream.host}")
 	private String downstreamHost;
 
+	@Value("${degressly.delay.between.outgoing.calls:0}")
+	private long delayBetweenOutgoingCalls;
+
 	private final ExecutorService outgoingExecutorService = Executors.newVirtualThreadPerTaskExecutor();
 
 	private final ExecutorService incomingExecutorService = Executors.newSingleThreadExecutor();
@@ -48,7 +51,7 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 	private Future<?> previousIncomingRequestFuture = null;
 
 	@Override
-	public void handle(DegresslyRequest degresslyRequest) {
+	public void handle(DegresslyRequest degresslyRequest) throws InterruptedException {
 
 		if ("OUTGOING".equals(degresslyRequest.getType())) {
 			outgoingExecutorService.submit(() -> handleOutgoingRequest(degresslyRequest));
@@ -59,7 +62,7 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 
 	}
 
-	private void performOneConcurrentOutgoingRequest(DegresslyRequest degresslyRequest) {
+	private void performOneConcurrentOutgoingRequest(DegresslyRequest degresslyRequest) throws InterruptedException {
 		if (previousIncomingRequestFuture != null && !previousIncomingRequestFuture.isDone()) {
 			try {
 				previousIncomingRequestFuture.get();
@@ -69,6 +72,10 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 			}
 		}
 		previousIncomingRequestFuture = incomingExecutorService.submit(() -> handleIncomingRequest(degresslyRequest));
+
+		if (delayBetweenOutgoingCalls > 0) {
+			Thread.sleep(delayBetweenOutgoingCalls);
+		}
 	}
 
 	private void handleIncomingRequest(DegresslyRequest degresslyRequest) {
