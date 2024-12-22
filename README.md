@@ -8,9 +8,21 @@ Degressly is a portmanteau of "Deterministic Regression". Inspired by [opendiffy
 
 Degressly works by running three parallel instances of your code side by side and multicasting all inbound requests to all three instances. The primary and secondary instances run your last known good code, while the candidate instances runs code that is to be tested.
 Differences between primary and candidate instances involve noise from non-deterministic sources like random number generation and timestamps, these differences are ignored based on the differences obtained from responses of primary and secondary instances.
+This allows you to perform black-box testing of your code without needing to write any tests, or mocking data that is a representative sample of your production environment.
 
 If you want a quick and dirty way to try out degressly with a sample application, check out [degressly/degressly-demo](https://github.com/degressly/degressly-demo).
 
+## Features
+* In-depth analysis of differences in behaviour between new and old code. Including:
+  * Differences in API Responses.
+  * Differences in API requests made by the microservice.
+  * Differences in data stored in the datastore.
+* Filtering out noise from non-deterministic sources like random number generation and timestamps.
+* Native support for replaying requests.
+* Support for non-idempotent upstream APIs where each request must be sent once and once only.
+  * Support for trapping all upstream calls when replaying requests.
+
+## Architecture
 The degressly ecosystem depends on the following repositories:
 
 | Repository               | Description                                                                                                                                                                                                                                                      |
@@ -107,7 +119,7 @@ docker compose --profile full up
 
 ## Limitations / TODO
 _In no particular order:_
-* DB layer observation recon (comparator can consume from debezium or similar CDC pipeline).
+* ~~DB layer observation recon (comparator can consume from debezium or similar CDC pipeline).~~
 * ~~DB Proxy...?~~
 * Performance regression tracking.
 * ~~Dockerization.~~
