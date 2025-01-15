@@ -52,7 +52,7 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 	private Future<?> previousIncomingRequestFuture = null;
 
 	@Override
-	public void handle(DegresslyRequest degresslyRequest) throws InterruptedException {
+	public void handle(DegresslyRequest degresslyRequest) {
 
 		if ("OUTGOING".equals(degresslyRequest.getType())) {
 			outgoingExecutorService.submit(() -> handleOutgoingRequest(degresslyRequest));
@@ -63,7 +63,7 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 
 	}
 
-	private void performOneConcurrentIncomingRequest(DegresslyRequest degresslyRequest) throws InterruptedException {
+	private void performOneConcurrentIncomingRequest(DegresslyRequest degresslyRequest) {
 		if (previousIncomingRequestFuture != null && !previousIncomingRequestFuture.isDone()) {
 			try {
 				previousIncomingRequestFuture.get();
@@ -72,11 +72,18 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 				log.error("Error while executing incoming request: ", e);
 			}
 		}
-		previousIncomingRequestFuture = incomingExecutorService.submit(() -> handleIncomingRequest(degresslyRequest));
+		previousIncomingRequestFuture = incomingExecutorService.submit(() -> {
+			handleIncomingRequest(degresslyRequest);
+			if (delayBetweenOutgoingCalls > 0) {
+				try {
+					Thread.sleep(delayBetweenOutgoingCalls);
+				}
+				catch (InterruptedException e) {
+					log.error("Error while sleeping between outgoing calls: ", e);
+				}
+			}
+		});
 
-		if (delayBetweenOutgoingCalls > 0) {
-			Thread.sleep(delayBetweenOutgoingCalls);
-		}
 	}
 
 	private void handleIncomingRequest(DegresslyRequest degresslyRequest) {
