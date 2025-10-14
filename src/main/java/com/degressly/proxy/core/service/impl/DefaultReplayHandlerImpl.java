@@ -50,7 +50,7 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 
 	private final ExecutorService outgoingExecutorService = Executors.newVirtualThreadPerTaskExecutor();
 
-	private final ExecutorService incomingExecutorService = Executors.newSingleThreadExecutor();
+	private final ExecutorService incomingExecutorService = Executors.newVirtualThreadPerTaskExecutor();
 
 	private Future<?> previousIncomingRequestFuture = null;
 
