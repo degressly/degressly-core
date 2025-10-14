@@ -67,7 +67,7 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 	}
 
 	private void performOneConcurrentIncomingRequest(DegresslyRequest degresslyRequest) throws InterruptedException {
-		if (performIncomingRequestsConcurrently ||
+		if (!performIncomingRequestsConcurrently &&
 		// If incoming requests need to be performed in a non-concurrent manner, wait for
 		// previous request to complete.
 				(previousIncomingRequestFuture != null && !previousIncomingRequestFuture.isDone())) {
