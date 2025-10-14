@@ -45,6 +45,9 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 	@Value("${degressly.delay.between.outgoing.calls:0}")
 	private long delayBetweenOutgoingCalls;
 
+	@Value("${perform.incoming.requests.concurrently:false}")
+	private boolean performIncomingRequestsConcurrently;
+
 	private final ExecutorService outgoingExecutorService = Executors.newVirtualThreadPerTaskExecutor();
 
 	private final ExecutorService incomingExecutorService = Executors.newSingleThreadExecutor();
@@ -64,7 +67,10 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 	}
 
 	private void performOneConcurrentIncomingRequest(DegresslyRequest degresslyRequest) throws InterruptedException {
-		if (previousIncomingRequestFuture != null && !previousIncomingRequestFuture.isDone()) {
+		if (performIncomingRequestsConcurrently ||
+		// If incoming requests need to be performed in a non-concurrent manner, wait for
+		// previous request to complete.
+				(previousIncomingRequestFuture != null && !previousIncomingRequestFuture.isDone())) {
 			try {
 				previousIncomingRequestFuture.get();
 			}
