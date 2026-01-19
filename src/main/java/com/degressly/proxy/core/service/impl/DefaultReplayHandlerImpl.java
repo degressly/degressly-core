@@ -79,9 +79,9 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 			}
 		}
 
-        if (delayBetweenOutgoingCalls > 0) {
-            Thread.sleep(delayBetweenOutgoingCalls);
-        }
+		if (delayBetweenOutgoingCalls > 0) {
+			Thread.sleep(delayBetweenOutgoingCalls);
+		}
 
 		previousIncomingRequestFuture = incomingExecutorService.submit(() -> handleIncomingRequest(degresslyRequest));
 	}
