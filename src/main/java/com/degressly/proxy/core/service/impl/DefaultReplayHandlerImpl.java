@@ -78,11 +78,12 @@ public class DefaultReplayHandlerImpl implements ReplayHandler {
 				log.error("Error while executing incoming request: ", e);
 			}
 		}
-		previousIncomingRequestFuture = incomingExecutorService.submit(() -> handleIncomingRequest(degresslyRequest));
 
-		if (delayBetweenOutgoingCalls > 0) {
-			Thread.sleep(delayBetweenOutgoingCalls);
-		}
+        if (delayBetweenOutgoingCalls > 0) {
+            Thread.sleep(delayBetweenOutgoingCalls);
+        }
+
+		previousIncomingRequestFuture = incomingExecutorService.submit(() -> handleIncomingRequest(degresslyRequest));
 	}
 
 	private void handleIncomingRequest(DegresslyRequest degresslyRequest) {
